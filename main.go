@@ -418,7 +418,7 @@ func insNama(list []dataTempat) []dataTempat {
 		j := i - 1
 		for j >= 0 && strings.ToLower(sortList[j].nama) > strings.ToLower(key.nama) {
 			sortList[j+1] = sortList[j]
-			j = j - 1
+			j--
 		}
 		sortList[j+1] = key
 	}
@@ -461,7 +461,7 @@ func insLokasi(list []dataTempat) []dataTempat {
 		j := i - 1
 		for j >= 0 && strings.ToLower(sortList[j].lokasi) > strings.ToLower(key.lokasi) {
 			sortList[j+1] = sortList[j]
-			j = j - 1
+			j--
 		}
 		sortList[j+1] = key
 	}

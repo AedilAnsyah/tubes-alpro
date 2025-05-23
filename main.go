@@ -24,8 +24,8 @@ var (
 	reader       = bufio.NewReader(os.Stdin)
 	daftarTempat []dataTempat
 	daftarUlasan []dataUlasan
-	nextID       = 1
-	nextUID      = 1
+	nextID       = 4
+	nextUID      = 4
 )
 
 func cariID(id int) (*dataTempat, int) {
@@ -44,6 +44,12 @@ func cariUID(id int) (*dataUlasan, int) {
 		}
 	}
 	return nil, -1
+}
+
+func teksBersih(a string) string {
+	a, _ = reader.ReadString('\n')
+	a = strings.TrimSpace(a)
+	return a
 }
 
 func ulasanTempat(id int) []dataUlasan {
@@ -71,25 +77,25 @@ func retaRata(id int) float64 {
 func tampilanTempat(tempat *dataTempat, teks string) {
 	fmt.Printf("\n<<----<< %s >>---->>\n", teks)
 	if tempat == nil {
-		fmt.Println("Tempat tidak ada ❌")
+		fmt.Println("Tempat tidak ada")
 		return
 	}
 	t := *tempat
 	avg := retaRata(t.ID)
 	fmt.Printf("ID: %d, Nama: %s, Lokasi: %s\n", t.ID, t.nama, t.lokasi)
-	fmt.Printf("Harga: %.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
+	fmt.Printf("Harga: Rp%.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
 }
 
 func tampilanSemuaTempat(list []dataTempat, teks string) {
 	fmt.Printf("\n<<----<< %s >>---->>\n", teks)
 	if len(list) == 0 {
-		fmt.Println("Tempat tidak ada ❌")
+		fmt.Println("Tempat tidak ada ")
 		return
 	}
 	for _, t := range list {
 		avg := retaRata(t.ID)
 		fmt.Printf("ID: %d, Nama: %s, Lokasi: %s\n", t.ID, t.nama, t.lokasi)
-		fmt.Printf("Harga: %.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
+		fmt.Printf("Harga: Rp%.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
 	}
 	fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
 }
@@ -97,7 +103,7 @@ func tampilanSemuaTempat(list []dataTempat, teks string) {
 func tampilanSemuaUlasan(list []dataUlasan, teks string) {
 	fmt.Printf("\n<<----<< %s >>---->>\n", teks)
 	if len(list) == 0 {
-		fmt.Println("Ulasan tidak ada ❌")
+		fmt.Println("Ulasan tidak ada ")
 		return
 	}
 	for _, u := range list {
@@ -113,24 +119,20 @@ func tampilanSemuaUlasan(list []dataUlasan, teks string) {
 }
 
 func tambahTempat() {
+	var namaTempat, lokasi, fasilitas, harga string
 	fmt.Print("🔤 Nama Tempat --> ")
-	namaTempat, _ := reader.ReadString('\n')
+	namaTempat = teksBersih(namaTempat)
 	fmt.Print("📌 Lokasi --> ")
-	lokasi, _ := reader.ReadString('\n')
+	lokasi = teksBersih(lokasi)
 	fmt.Print("🛜 Fasilitas (contoh: wifi,snack) --> ")
-	fasilitas, _ := reader.ReadString('\n')
-	fmt.Print("💲 Harga per Jam --> ")
-
-	harga, _ := reader.ReadString('\n')
-	namaTempat = strings.TrimSpace(namaTempat)
-	lokasi = strings.TrimSpace(lokasi)
-	fasilitasArr := strings.Split(strings.TrimSpace(fasilitas), ",")
+	fasilitasArr := strings.Split(teksBersih(fasilitas), ",")
 	for i, f := range fasilitasArr {
 		fasilitasArr[i] = strings.TrimSpace(f)
 	}
-	hargaTempat, err := strconv.ParseFloat(strings.TrimSpace(harga), 64)
+	fmt.Print("💲 Harga per Jam --> ")
+	hargaTempat, err := strconv.ParseFloat(teksBersih(harga), 64)
 	if err != nil {
-		fmt.Println("Input tidak valid ❌")
+		fmt.Println("Input tidak valid ")
 		return
 	}
 	tempat := dataTempat{
@@ -142,76 +144,71 @@ func tambahTempat() {
 	}
 	daftarTempat = append(daftarTempat, tempat)
 	nextID++
-	fmt.Printf("Tempat %s (ID: %d) ditambahkan!👍\n", namaTempat, tempat.ID)
+	fmt.Printf("Tempat %s (ID: %d) ditambahkan!👍 \n", namaTempat, tempat.ID)
 }
 
 func editTempat() {
+	var id, namaBaru, lokasiBaru, fasilitasBaru, hargaBaru string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	fmt.Print("🆔 ID Tempat yang ingin diedit --> ")
-	id, _ := reader.ReadString('\n')
-	idEdit, err := strconv.Atoi(strings.TrimSpace(id))
+	idEdit, err := strconv.Atoi(teksBersih(id))
 	if err != nil {
-		fmt.Println("Input ID tidak valid ❌")
+		fmt.Println("Input ID tidak valid ")
 		return
 	}
-	tempatEdit, idx := cariID(idEdit)
+	tempatEdit, index := cariID(idEdit)
 	if tempatEdit == nil {
-		fmt.Println("Tempat tidak ada ❌")
+		fmt.Println("Tempat tidak ada ")
 		return
 	}
 	fmt.Print("🔤 Nama Baru (kosongkan jika tidak berubah) --> ")
-	namaBaru, _ := reader.ReadString('\n')
-	fmt.Print("📌 Lokasi Baru (kosongkan jika tidak berubah) --> ")
-	lokasiBaru, _ := reader.ReadString('\n')
-	fmt.Print("🛜 Fasilitas Baru (pisahkan dengan koma dan kosongkan jika tidak berubah) --> ")
-	fasilitasBaru, _ := reader.ReadString('\n')
-	fmt.Print("💲 Harga Baru (0 jika tidak berubah) --> ")
-	inputHargaBaru, _ := reader.ReadString('\n')
-
-	namaBaru = strings.TrimSpace(namaBaru)
+	namaBaru = teksBersih(namaBaru)
 	if namaBaru != "" {
-		daftarTempat[idx].nama = namaBaru
+		daftarTempat[index].nama = namaBaru
 	}
-	lokasiBaru = strings.TrimSpace(lokasiBaru)
+	fmt.Print("📌 Lokasi Baru (kosongkan jika tidak berubah) --> ")
+	lokasiBaru = teksBersih(lokasiBaru)
 	if lokasiBaru != "" {
-		daftarTempat[idx].lokasi = lokasiBaru
+		daftarTempat[index].lokasi = lokasiBaru
 	}
-	fasilitasBaru = strings.TrimSpace(fasilitasBaru)
+	fmt.Print("🛜 Fasilitas Baru (pisahkan dengan koma dan kosongkan jika tidak berubah) --> ")
+	fasilitasBaru = teksBersih(fasilitasBaru)
 	if fasilitasBaru != "" {
-		fasiltasBaruArr := strings.Split(strings.TrimSpace(fasilitasBaru), ",")
+		fasiltasBaruArr := strings.Split(fasilitasBaru, ",")
 		for i, f := range fasiltasBaruArr {
 			fasiltasBaruArr[i] = strings.TrimSpace(f)
 		}
-		daftarTempat[idx].fasilitas = fasiltasBaruArr
+		daftarTempat[index].fasilitas = fasiltasBaruArr
 	}
-	hargaBaru := strings.TrimSpace(inputHargaBaru)
+	fmt.Print("💲 Harga Baru (0 jika tidak berubah) --> ")
+	hargaBaru = teksBersih(hargaBaru)
 	if hargaBaru != "" && hargaBaru != "0" {
-		hargaBaruFloat, err := strconv.ParseFloat(strings.TrimSpace(hargaBaru), 64)
+		hargaBaruFloat, err := strconv.ParseFloat(hargaBaru, 64)
 		if err == nil {
-			daftarTempat[idx].harga = hargaBaruFloat
+			daftarTempat[index].harga = hargaBaruFloat
 		} else {
-			fmt.Println("Input harga tidak valid ❌, harga tidak berubah")
+			fmt.Println("Input harga tidak valid, harga tidak berubah")
 		}
 	}
-
-	fmt.Printf("Data Tempat dengan ID %d berubah\n", idEdit)
+	fmt.Printf("Data Tempat dengan ID %d berhasil diubah! 👍 \n", idEdit)
 }
 
 func hapusTempat() {
+	var id string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	fmt.Print("🆔 ID tempat yang ingin dihapus --> ")
-	id, _ := reader.ReadString('\n')
-	idDel, err := strconv.Atoi(strings.TrimSpace(id))
+	id = teksBersih(id)
+	idDel, err := strconv.Atoi(id)
 	if err != nil {
-		fmt.Println("Input ID tidak valid ❌")
+		fmt.Println("Input ID tidak valid ")
 		return
 	}
-	_, idx := cariID(idDel)
-	if idx == -1 {
-		fmt.Println("ID tidak ditemukan ❌")
+	_, index := cariID(idDel)
+	if index == -1 {
+		fmt.Println("ID tidak ditemukan ")
 		return
 	}
-	daftarTempat = append(daftarTempat[:idx], daftarTempat[idx+1:]...)
+	daftarTempat = append(daftarTempat[:index], daftarTempat[index+1:]...)
 
 	var sisaUlasan []dataUlasan
 	for _, ulasan := range daftarUlasan {
@@ -220,37 +217,35 @@ func hapusTempat() {
 		}
 	}
 	daftarUlasan = sisaUlasan
-	fmt.Printf("Tempat dengan ID %d dan Ulasannya dihapus!👍\n", idDel)
+	fmt.Printf("Tempat dengan ID %d dan Ulasannya dihapus!👍 \n", idDel)
 }
 
 func tambahUlasan() {
+	var tempatID, username, rating, komentar string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	fmt.Print("🆔 ID Tempat yang diberi ulasan --> ")
-	tempatID, _ := reader.ReadString('\n')
-	tID, err := strconv.Atoi(strings.TrimSpace(tempatID))
+	tempatID = teksBersih(tempatID)
+	tID, err := strconv.Atoi(tempatID)
 	if err != nil {
-		fmt.Println("Input ID tidak valid ❌")
+		fmt.Println("Input ID tidak valid ")
 		return
 	}
-	if _, idx := cariID(tID); idx == -1 {
-		fmt.Println("ID tidak ditemukan ❌")
+	if _, index := cariID(tID); index == -1 {
+		fmt.Println("ID tidak ditemukan ")
 		return
 	}
 
 	fmt.Print("👤 Username --> ")
-	username, _ := reader.ReadString('\n')
+	username = teksBersih(username)
 	fmt.Print("⭐  Rating (1-5) --> ")
-	rating, _ := reader.ReadString('\n')
-	fmt.Print("💬 Komentar --> ")
-	komentar, _ := reader.ReadString('\n')
-
-	username = strings.TrimSpace(username)
-	ratingUlasan, err := strconv.Atoi(strings.TrimSpace(rating))
+	rating = teksBersih(rating)
+	ratingUlasan, err := strconv.Atoi(rating)
 	if err != nil || ratingUlasan < 1 || ratingUlasan > 5 {
-		fmt.Println("Input rating tidak valid (harus integer 1-5) ❌")
+		fmt.Println("Input rating tidak valid (harus integer 1-5) ")
 		return
 	}
-	komentar = strings.TrimSpace(komentar)
+	fmt.Print("💬 Komentar --> ")
+	komentar = teksBersih(komentar)
 
 	ulasanBaru := dataUlasan{
 		ulasanID: nextUID,
@@ -265,79 +260,75 @@ func tambahUlasan() {
 }
 
 func editUlasan() {
+	var ulasanID, rating, komentarBaru string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	tampilanUlasan()
 	fmt.Print("🆔 ID ulasan yang ingin dirubah --> ")
-	ulasanID, _ := reader.ReadString('\n')
-	uID, err := strconv.Atoi(strings.TrimSpace(ulasanID))
+	ulasanID = teksBersih(ulasanID)
+	uID, err := strconv.Atoi(ulasanID)
 	if err != nil {
-		fmt.Println("ID ulasan tidak valid ❌")
+		fmt.Println("ID ulasan tidak valid ")
 		return
 	}
-	ulasanEdit, idx := cariUID(uID)
+	ulasanEdit, index := cariUID(uID)
 	if ulasanEdit == nil {
-		fmt.Println("Ulasan tidak ditemukan ❌")
+		fmt.Println("Ulasan tidak ditemukan")
 		return
 	}
-
-	fmt.Println("⭐  Rating Baru (integer 1-5, kosongkan jika tidak berubah) --> ")
-	rating, _ := reader.ReadString('\n')
-	rating = strings.TrimSpace(rating)
+	fmt.Print("⭐  Rating Baru (integer 1-5, kosongkan jika tidak berubah) --> ")
+	rating = teksBersih(rating)
 	if rating != "" {
-		ratingBaru, err := strconv.Atoi(strings.TrimSpace(rating))
+		ratingBaru, err := strconv.Atoi(rating)
 		if err != nil || ratingBaru > 5 || ratingBaru < 1 {
-			fmt.Println("Input rating tidak valid (harus integer 1-5) ❌")
+			fmt.Println("Input rating tidak valid (harus integer 1-5) ")
 		} else {
-			daftarUlasan[idx].rating = ratingBaru
+			daftarUlasan[index].rating = ratingBaru
 		}
 	}
-
 	fmt.Print("💬 Komentar Baru (Kosongkan jika tidak berubah) --> ")
-	komentarBaru, _ := reader.ReadString('\n')
-	komentarBaru = strings.TrimSpace(komentarBaru)
+	komentarBaru = teksBersih(komentarBaru)
 	if komentarBaru != "" {
-		daftarUlasan[idx].komentar = komentarBaru
+		daftarUlasan[index].komentar = komentarBaru
 	}
-	fmt.Println("Ulasan berubah!👍")
+	fmt.Println("Ulasan berubah!👍 ")
 }
 
 func hapusUlasan() {
+	var ulasanID string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	tampilanUlasan()
 	fmt.Print("🆔 ID ulasan yang ingin dihapus --> ")
-	ulasanID, _ := reader.ReadString('\n')
-	uID, err := strconv.Atoi(strings.TrimSpace(ulasanID))
+	ulasanID = teksBersih(ulasanID)
+	uID, err := strconv.Atoi(ulasanID)
 	if err != nil {
-		fmt.Println("ID ulasan tidak valid ❌")
+		fmt.Println("ID ulasan tidak valid ")
 		return
 	}
-
-	_, idx := cariUID(uID)
-	if idx == -1 {
-		fmt.Println("ID ulasan tidak ditemukan ❌")
+	_, index := cariUID(uID)
+	if index == -1 {
+		fmt.Println("ID ulasan tidak ditemukan ")
 		return
 	}
-	daftarUlasan = append(daftarUlasan[:idx], daftarUlasan[idx+1:]...)
-	fmt.Println("Ulasan dihapus!👍")
+	daftarUlasan = append(daftarUlasan[:index], daftarUlasan[index+1:]...)
+	fmt.Println("Ulasan dihapus!👍 ")
 }
 
 func tampilanUlasan() {
+	var tempatID string
 	tampilanSemuaTempat(daftarTempat, "Semua Tempat")
 	fmt.Print("🆔 Masukkan ID Tempat (kosongkan untuk semua ulasan) --> ")
-	tempatID, _ := reader.ReadString('\n')
-	tempatID = strings.TrimSpace(tempatID)
+	tempatID = teksBersih(tempatID)
 
 	var ulasanTampil []dataUlasan
 	teks := "Semua Ulasan"
-
 	if tempatID != "" {
 		tID, err := strconv.Atoi(tempatID)
 		if err != nil {
-			fmt.Println("ID Tempat tidak valid ❌")
+			fmt.Println("ID Tempat tidak valid ")
 			return
 		}
-		if _, idx := cariID(tID); idx == -1 {
-			fmt.Println("ID Tempat tidak ditemukan ❌")
+		if _, index := cariID(tID); index == -1 {
+			fmt.Println("ID Tempat tidak ditemukan ")
 			return
 		}
 		ulasanTampil = ulasanTempat(tID)
@@ -350,6 +341,7 @@ func tampilanUlasan() {
 }
 
 func menuUlasan() {
+	var pilihan string
 	for {
 		fmt.Println("\n<<----<<----<< Menu Ulasan >>---->>---->>")
 		fmt.Println("|| ➕  1. Tambah Ulasan.................||")
@@ -359,8 +351,7 @@ func menuUlasan() {
 		fmt.Println("|| 🚪 5. Kembali.......................||")
 		fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
 		fmt.Print("Pilih (1-5): ")
-		pilihan, _ := reader.ReadString('\n')
-		pilihan = strings.TrimSpace(pilihan)
+		pilihan = teksBersih(pilihan)
 
 		switch pilihan {
 		case "1":
@@ -374,37 +365,9 @@ func menuUlasan() {
 		case "5":
 			return
 		default:
-			fmt.Println("Pilihan tidak valid ❌")
+			fmt.Println("Pilihan tidak valid")
 		}
 	}
-}
-
-func seqNama() []dataTempat {
-	fmt.Print("🔤 Masukkan nama tempat --> ")
-	isian, _ := reader.ReadString('\n')
-	isian = strings.ToLower(strings.TrimSpace(isian))
-
-	var hasil []dataTempat
-	for _, tempat := range daftarTempat {
-		if strings.Contains(strings.ToLower(tempat.nama), isian) {
-			hasil = append(hasil, tempat)
-		}
-	}
-	return hasil
-}
-
-func seqLokasi() []dataTempat {
-	fmt.Print("📌 Masukkan lokasi --> ")
-	isian, _ := reader.ReadString('\n')
-	isian = strings.ToLower(strings.TrimSpace(isian))
-
-	var hasil []dataTempat
-	for _, tempat := range daftarTempat {
-		if strings.Contains(strings.ToLower(tempat.lokasi), isian) {
-			hasil = append(hasil, tempat)
-		}
-	}
-	return hasil
 }
 
 func insNama(list []dataTempat) []dataTempat {
@@ -426,9 +389,9 @@ func insNama(list []dataTempat) []dataTempat {
 }
 
 func binNama() *dataTempat {
+	var isian string
 	fmt.Print("🔤 Masukkan nama tempat --> ")
-	isian, _ := reader.ReadString('\n')
-	isian = strings.ToLower(strings.TrimSpace(isian))
+	isian = teksBersih(isian)
 	if len(daftarTempat) == 0 {
 		return nil
 	}
@@ -450,55 +413,27 @@ func binNama() *dataTempat {
 	return nil
 }
 
-func insLokasi(list []dataTempat) []dataTempat {
-	var (
-		n        = len(list)
-		sortList = make([]dataTempat, n)
-	)
-	copy(sortList, list)
-	for i := 1; i < n; i++ {
-		key := sortList[i]
-		j := i - 1
-		for j >= 0 && strings.ToLower(sortList[j].lokasi) > strings.ToLower(key.lokasi) {
-			sortList[j+1] = sortList[j]
-			j--
-		}
-		sortList[j+1] = key
-	}
-	return sortList
-}
-
-func binLokasi() *dataTempat {
+func seqLokasi() []dataTempat {
+	var isian string
 	fmt.Print("📌 Masukkan lokasi --> ")
-	isian, _ := reader.ReadString('\n')
-	isian = strings.ToLower(strings.TrimSpace(isian))
-	if len(daftarTempat) == 0 {
-		return nil
-	}
-	sortCopy := insLokasi(daftarTempat)
-	low := 0
-	high := len(sortCopy) - 1
-	for low <= high {
-		mid := low + (high-low)/2
-		midLokasi := strings.ToLower(sortCopy[mid].lokasi)
-		if midLokasi == isian {
-			tempatAsli, _ := cariID(sortCopy[mid].ID)
-			return tempatAsli
-		} else if midLokasi < isian {
-			low = mid + 1
-		} else {
-			high = mid - 1
+	isian = teksBersih(isian)
+	isian = strings.ToLower(isian)
+
+	var hasil []dataTempat
+	for _, tempat := range daftarTempat {
+		if strings.Contains(strings.ToLower(tempat.lokasi), isian) {
+			hasil = append(hasil, tempat)
 		}
 	}
-	return nil
+	return hasil
 }
 
 func filterFasilitas() []dataTempat {
+	var fasilitasStr string
 	fmt.Print("🛜 Masukkan fasilitas yang dicari (pisahkan dengan koma) --> ")
-	fasilitasStr, _ := reader.ReadString('\n')
-	fasilitasStr = strings.TrimSpace(fasilitasStr)
+	fasilitasStr = teksBersih(fasilitasStr)
 	if fasilitasStr == "" {
-		fmt.Println("Tidak ada fasilitas yang dimasukkan ❌")
+		fmt.Println("Tidak ada fasilitas yang dimasukkan ")
 		return []dataTempat{}
 	}
 	fasilitasArr := strings.Split(fasilitasStr, ",")
@@ -529,73 +464,37 @@ func filterFasilitas() []dataTempat {
 }
 
 func menuCari() {
+	var pilihan string
 	for {
 		fmt.Println("\n<<----<<  Cari Co-working Space  >>---->>")
-		fmt.Println("|| 🔤 1. Cari Nama (Sequential)........||")
-		fmt.Println("|| 🔤 2. Cari Nama (Binary)............||")
-		fmt.Println("|| 📌 3. Cari Lokasi (Sequential)......||")
-		fmt.Println("|| 📌 4. Cari Lokasi (Binary)..........||")
-		fmt.Println("|| 🎯 5. Filter Fasilitas..............||")
-		fmt.Println("|| 🚪 6. Kembali.......................||")
+		fmt.Println("|| 🔤 1. Cari Nama (Binary)............||")
+		fmt.Println("|| 📌 2. Cari Lokasi (Sequential)......||")
+		fmt.Println("|| 🎯 3. Filter Fasilitas..............||")
+		fmt.Println("|| 🚪 4. Kembali.......................||")
 		fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
-		fmt.Print("Pilih (1-6): ")
-		pilihan, _ := reader.ReadString('\n')
-		pilihan = strings.TrimSpace(pilihan)
+		fmt.Print("Pilih (1-4): ")
+		pilihan = teksBersih(pilihan)
 
 		switch pilihan {
 		case "1":
-			hasilSeqNama := seqNama()
-			tampilanSemuaTempat(hasilSeqNama, "Hasil Pencarian Nama (Sequential Search)")
-		case "2":
 			hasilBinNama := binNama()
 			if hasilBinNama != nil {
 				tampilanTempat(hasilBinNama, "Hasil Pencarian Nama (Binary Search)")
 			} else {
-				fmt.Println("Nama Tidak ditemukan ❌")
+				fmt.Println("Nama Tidak ditemukan ")
 			}
-		case "3":
+		case "2":
 			hasilSeqLokasi := seqLokasi()
 			tampilanSemuaTempat(hasilSeqLokasi, "Hasil Pencarian Lokasi (Sequential Search)")
-		case "4":
-			hasilBinLokasi := binLokasi()
-			if hasilBinLokasi != nil {
-				tampilanTempat(hasilBinLokasi, "Hasil Pencarian Lokasi (Binary Search)")
-			} else {
-				fmt.Println("Lokasi Tidak ditemukan ❌")
-			}
-		case "5":
+		case "3":
 			hasilFilter := filterFasilitas()
 			tampilanSemuaTempat(hasilFilter, "Hasil Filter Fasilitas")
-		case "6":
+		case "4":
 			return
 		default:
-			fmt.Println("Pilihan tidak valid ❌")
+			fmt.Println("Pilihan tidak valid ")
 		}
 	}
-}
-
-func selecSortHarga(list []dataTempat, asc bool) []dataTempat {
-	var (
-		n        = len(list)
-		sortList = make([]dataTempat, n)
-	)
-	copy(sortList, list)
-	for i := 0; i < n-1; i++ {
-		ekstrimIdx := i
-		for j := i + 1; j < n; j++ {
-			if asc {
-				if sortList[j].harga < sortList[ekstrimIdx].harga {
-					ekstrimIdx = j
-				}
-			} else {
-				if sortList[j].harga > sortList[ekstrimIdx].harga {
-					ekstrimIdx = j
-				}
-			}
-		}
-		sortList[i], sortList[ekstrimIdx] = sortList[ekstrimIdx], sortList[i]
-	}
-	return sortList
 }
 
 func selecSortRating(list []dataTempat, desc bool) []dataTempat {
@@ -606,24 +505,24 @@ func selecSortRating(list []dataTempat, desc bool) []dataTempat {
 	copy(sortList, list)
 	for i := 0; i < n-1; i++ {
 		var (
-			ekstrimIdx       = i
-			ratingEkstrimIdx = retaRata(sortList[ekstrimIdx].ID)
+			idx       = i
+			ratingIdx = retaRata(sortList[idx].ID)
 		)
 		for j := i + 1; j < n; j++ {
 			ratingJ := retaRata(sortList[j].ID)
 			if desc {
-				if ratingJ > ratingEkstrimIdx {
-					ekstrimIdx = j
-					ratingEkstrimIdx = ratingJ
+				if ratingJ > ratingIdx {
+					idx = j
+					ratingIdx = ratingJ
 				}
 			} else {
-				if ratingJ < ratingEkstrimIdx {
-					ekstrimIdx = j
-					ratingEkstrimIdx = ratingJ
+				if ratingJ < ratingIdx {
+					idx = j
+					ratingIdx = ratingJ
 				}
 			}
 		}
-		sortList[i], sortList[ekstrimIdx] = sortList[ekstrimIdx], sortList[i]
+		sortList[i], sortList[idx] = sortList[idx], sortList[i]
 	}
 	return sortList
 }
@@ -655,61 +554,21 @@ func insertSortHarga(list []dataTempat, asc bool) []dataTempat {
 	return sortList
 }
 
-func insertSortRating(list []dataTempat, desc bool) []dataTempat {
-	var (
-		n        = len(list)
-		sortList = make([]dataTempat, n)
-	)
-	copy(sortList, list)
-	for i := 1; i < n; i++ {
-		var (
-			key       = sortList[i]
-			ratingKey = retaRata(key.ID)
-			j         = i - 1
-		)
-		if desc {
-			for j >= 0 && retaRata(sortList[j].ID) < ratingKey {
-				sortList[j+1] = sortList[j]
-				j--
-			}
-		} else {
-			for j >= 0 && retaRata(sortList[j].ID) > ratingKey {
-				sortList[j+1] = sortList[j]
-				j--
-			}
-		}
-		sortList[j+1] = key
-	}
-	return sortList
-}
-
 func menuSort() {
+	var pilihan1, pilihan2 string
 	for {
-		fmt.Println("\n<<-<< Menu Urutkan Co-working space >>->>")
-		fmt.Println("|| 🔍 1. Selection Sort................||")
-		fmt.Println("|| 📥 2. Insertion Sort................||")
+		fmt.Println("\n<<--<<--<< Urutkan berdasarkan >>-->>-->>")
+		fmt.Println("|| 💲 1. Harga (Insertion).............||")
+		fmt.Println("|| ⭐  2. Rating (Selection)............||")
 		fmt.Println("|| 🚪 3. Kembali.......................||")
 		fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
-		fmt.Print("Pilih (1-3): ")
-		pilihan1, _ := reader.ReadString('\n')
-		pilihan1 = strings.TrimSpace(pilihan1)
+		fmt.Print("Pilih (1-2): ")
+		pilihan1 = teksBersih(pilihan1)
 		if pilihan1 == "3" {
 			return
 		}
 		if pilihan1 != "1" && pilihan1 != "2" {
-			fmt.Println("Pilihan tidak valid ❌")
-			continue
-		}
-
-		fmt.Println("<<--<<--<< Urutkan berdasarkan >>-->>-->>")
-		fmt.Println("|| 💲 1. Harga..................... ...||")
-		fmt.Println("|| ⭐  2. Rating........................||")
-		fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
-		fmt.Print("Pilih (1-2): ")
-		pilihan2, _ := reader.ReadString('\n')
-		pilihan2 = strings.TrimSpace(pilihan2)
-		if pilihan2 != "1" && pilihan2 != "2" {
-			fmt.Println("Pilihan tidak valid ❌")
+			fmt.Println("Pilihan tidak valid ")
 			continue
 		}
 
@@ -718,52 +577,51 @@ func menuSort() {
 		fmt.Println("|| ⬇️ 2. Descending (Turun)............||")
 		fmt.Println("<<----<<----<<----<<O>>---->>---->>---->>")
 		fmt.Print("Pilih (1-2): ")
-		pilihan3, _ := reader.ReadString('\n')
-		pilihan3 = strings.TrimSpace(pilihan3)
+		pilihan2 = teksBersih(pilihan2)
 		var (
 			iniAsc  = true
 			iniDesc = false
 		)
-		if pilihan3 == "2" {
+		if pilihan2 == "2" {
 			iniAsc = false
 			iniDesc = true
-		} else if pilihan3 != "1" {
-			fmt.Println("Pilihan tidak valid ❌")
+		} else if pilihan2 != "1" {
+			fmt.Println("Pilihan tidak valid ")
 			continue
 		}
-
 		var (
 			sortList []dataTempat
 			teksSort string
 		)
 
 		urutan := "Ascending"
-		if pilihan3 == "2" {
+		if pilihan2 == "2" {
 			urutan = "Descending"
 		}
 
 		if pilihan1 == "1" {
-			if pilihan2 == "1" {
-				sortList = selecSortHarga(daftarTempat, iniAsc)
-				teksSort = fmt.Sprintf("Daftar tempat berdasarkan harga (selection sort %s): ", urutan)
-			} else {
-				sortList = selecSortRating(daftarTempat, iniDesc)
-				teksSort = fmt.Sprintf("Daftar tempat berdasarkan rating (selection sort %s): ", urutan)
-			}
+			sortList = insertSortHarga(daftarTempat, iniAsc)
+			teksSort = fmt.Sprintf("Daftar tempat berdasarkan harga (insertion sort %s): ", urutan)
 		} else {
-			if pilihan2 == "1" {
-				sortList = insertSortHarga(daftarTempat, iniAsc)
-				teksSort = fmt.Sprintf("Daftar tempat berdasarkan harga (insertion sort %s): ", urutan)
-			} else {
-				sortList = insertSortRating(daftarTempat, iniDesc)
-				teksSort = fmt.Sprintf("Daftar tempat berdasarkan rating (insertion sort %s): ", urutan)
-			}
+			sortList = selecSortRating(daftarTempat, iniDesc)
+			teksSort = fmt.Sprintf("Daftar tempat berdasarkan rating (selection sort %s): ", urutan)
 		}
 		tampilanSemuaTempat(sortList, teksSort)
 	}
 }
 
 func main() {
+	var pilihan string
+	daftarTempat = []dataTempat{
+		{ID: 1, nama: "RuangKarya", lokasi: "Bandung", fasilitas: []string{"wifi", "snack", "meeting room"}, harga: 50000},
+		{ID: 2, nama: "Ark Space", lokasi: "Jakarta", fasilitas: []string{"wifi", "copy center", "free coffee"}, harga: 65000},
+		{ID: 3, nama: "Sunyi Space", lokasi: "Bandung", fasilitas: []string{"wifi", "snack", "copy center"}, harga: 43000},
+	}
+	daftarUlasan = []dataUlasan{
+		{ulasanID: 1, tempatID: 1, rating: 4, username: "rusdingawi", komentar: "Nyaman tapi wifi kadang lemot"},
+		{ulasanID: 2, tempatID: 2, rating: 5, username: "elsahurrr", komentar: "rekomen banget tempatnya nyaman dapet free cofee lagi"},
+		{ulasanID: 3, tempatID: 3, rating: 3, username: "rendikumar", komentar: "kurang bagus, mending ke ruang karya"},
+	}
 	for {
 		fmt.Println("\n<<----<< Aplikasi Manajemen Co-Working Space >>---->>")
 		fmt.Println("|| ➕  1. Tambah Co-Working Space...................||")
@@ -776,8 +634,7 @@ func main() {
 		fmt.Println("|| 🚪 8. Keluar....................................||")
 		fmt.Println("<<----<<----<<----<<----<<O>>---->>---->>---->>---->>")
 		fmt.Print("Pilih menu (1-8): ")
-		pilihan, _ := reader.ReadString('\n')
-		pilihan = strings.TrimSpace(pilihan)
+		pilihan = teksBersih(pilihan)
 
 		switch pilihan {
 		case "1":

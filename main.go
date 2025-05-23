@@ -62,7 +62,7 @@ func ulasanTempat(id int) []dataUlasan {
 	return ulasanIni
 }
 
-func retaRata(id int) float64 {
+func rataRata(id int) float64 {
 	ulasanIni := ulasanTempat(id)
 	if len(ulasanIni) == 0 {
 		return 0.0
@@ -81,7 +81,7 @@ func tampilanTempat(tempat *dataTempat, teks string) {
 		return
 	}
 	t := *tempat
-	avg := retaRata(t.ID)
+	avg := rataRata(t.ID)
 	fmt.Printf("ID: %d, Nama: %s, Lokasi: %s\n", t.ID, t.nama, t.lokasi)
 	fmt.Printf("Harga: Rp%.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
 }
@@ -93,7 +93,7 @@ func tampilanSemuaTempat(list []dataTempat, teks string) {
 		return
 	}
 	for _, t := range list {
-		avg := retaRata(t.ID)
+		avg := rataRata(t.ID)
 		fmt.Printf("ID: %d, Nama: %s, Lokasi: %s\n", t.ID, t.nama, t.lokasi)
 		fmt.Printf("Harga: Rp%.2f, Rating: %.2f, Fasilitas: %s\n", t.harga, avg, strings.Join(t.fasilitas, ", "))
 	}
@@ -506,10 +506,10 @@ func selecSortRating(list []dataTempat, desc bool) []dataTempat {
 	for i := 0; i < n-1; i++ {
 		var (
 			idx       = i
-			ratingIdx = retaRata(sortList[idx].ID)
+			ratingIdx = rataRata(sortList[idx].ID)
 		)
 		for j := i + 1; j < n; j++ {
-			ratingJ := retaRata(sortList[j].ID)
+			ratingJ := rataRata(sortList[j].ID)
 			if desc {
 				if ratingJ > ratingIdx {
 					idx = j

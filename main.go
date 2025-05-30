@@ -391,7 +391,7 @@ func insNama(list []dataTempat) []dataTempat {
 func binNama() *dataTempat {
 	var isian string
 	fmt.Print("🔤 Masukkan nama tempat --> ")
-	isian = teksBersih(isian)
+	isian = strings.ToLower(teksBersih(isian))
 	if len(daftarTempat) == 0 {
 		return nil
 	}
